@@ -134,7 +134,7 @@ You should see one JSON message roughly every 10 seconds per live event:
 
 ## Configuration
 
-All settings live in `src/main/resources/application.properties` and can be
+All settings live in `src/main/resources/application.yml` and can be
 overridden via environment variables:
 
 | Property | Env var | Default | Description |
