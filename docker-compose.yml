@@ -34,6 +34,30 @@ services:
       timeout: 10s
       retries: 20
 
+  # The tracking service itself, built from the local Dockerfile and run on the
+  # same compose network so it reaches Kafka via the INTERNAL listener.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tracking-app:latest
+    container_name: tracking-app
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Reach the broker over the in-network INTERNAL listener (not localhost:9092,
+      # which from inside this container would point at the container itself).
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
   # Optional web UI to browse topics and messages: http://localhost:8081
   kafka-ui:
     image: provectuslabs/kafka-ui:latest

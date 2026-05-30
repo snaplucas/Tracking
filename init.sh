@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
-# init.sh — bring up the infrastructure (Kafka) and start the tracking service.
+# init.sh — bring up the infrastructure (Kafka) and the tracking service, all in
+# Docker containers via Docker Compose.
 #
 # Usage:
-#   ./init.sh          # start Kafka, build, and run the service (foreground)
-#   ./init.sh down     # stop and remove the Kafka containers
+#   ./init.sh          # start Kafka, build the app image, and run the service (foreground)
+#   ./init.sh down     # stop and remove all containers
 #
 set -euo pipefail
 
@@ -33,10 +34,10 @@ if [[ "${1:-}" == "down" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 1. Start Kafka (and kafka-ui)
+# 1. Start the infrastructure (Kafka + kafka-ui) in the background
 # ---------------------------------------------------------------------------
 echo ">> Starting Kafka via Docker Compose..."
-$DC -f "$COMPOSE_FILE" up -d
+$DC -f "$COMPOSE_FILE" up -d kafka kafka-ui
 
 # ---------------------------------------------------------------------------
 # 2. Wait for the broker to report healthy
@@ -56,10 +57,12 @@ for i in $(seq 1 40); do
 done
 
 # ---------------------------------------------------------------------------
-# 3. Build and run the Spring Boot service (foreground)
+# 3. Build the app image and run the tracking service in a container (foreground)
 # ---------------------------------------------------------------------------
-echo ">> Building and starting the tracking service on http://localhost:8080 ..."
+echo ">> Building the tracking service image and starting it on http://localhost:8080 ..."
 echo ">> (Kafka UI available at http://localhost:8081)"
-echo ">> Press Ctrl+C to stop the service. Run './init.sh down' to stop Kafka."
+echo ">> Press Ctrl+C to stop the service. Run './init.sh down' to stop everything."
 
-./gradlew bootRun
+# Run in the foreground so application logs stream to this terminal and Ctrl+C
+# stops the service container. Kafka keeps running (started detached above).
+$DC -f "$COMPOSE_FILE" up --build app

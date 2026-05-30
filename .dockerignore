@@ -1,0 +1,11 @@
+# Keep the Docker build context small and reproducible. Note: the Gradle wrapper
+# directory `gradle/` is NOT excluded — the build needs gradle-wrapper.jar. The
+# component-tests/ module is kept because settings.gradle.kts includes it (Gradle
+# requires the project directory to exist), but its build output is dropped below.
+.git/
+.gradle/
+**/build/
+.idea/
+.claude/
+*.iml
+HELP.md
