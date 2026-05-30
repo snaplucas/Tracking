@@ -7,6 +7,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,6 +26,7 @@ import java.util.Map;
  * and producer.
  */
 @Configuration
+@EnableRetry
 public class AppConfig {
 
     /** HTTP client pointed at the external scores API. */
@@ -72,6 +74,12 @@ public class AppConfig {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         config.put(JacksonJsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         config.put(ProducerConfig.ACKS_CONFIG, "all");
+        // Producer-level retries for transient broker/network failures. This is
+        // the first line of defence; the application-level @Retryable in
+        // KafkaScorePublisher recovers from failures that outlive these. The
+        // default delivery.timeout.ms (120s) bounds the total time across these
+        // retries.
+        config.put(ProducerConfig.RETRIES_CONFIG, 3);
         return new DefaultKafkaProducerFactory<>(config);
     }
 

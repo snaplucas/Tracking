@@ -23,6 +23,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.kafka:spring-kafka")
+    // spring-retry is not managed by the Spring Boot 4.0 platform, so its version
+    // is pinned here. @EnableRetry's auto-proxy creator needs aspectjweaver
+    // (version managed by the Boot platform).
+    implementation("org.springframework.retry:spring-retry:2.0.12")
+    implementation("org.aspectj:aspectjweaver")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
