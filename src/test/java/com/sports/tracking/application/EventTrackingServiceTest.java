@@ -14,14 +14,14 @@ import static org.mockito.Mockito.*;
 
 class EventTrackingServiceTest {
 
-    private final ScoreFeedClient scoreFeedClient = mock(ScoreFeedClient.class);
+    private final ScoreClient scoreClient = mock(ScoreClient.class);
     private final ScorePublisher scorePublisher = mock(ScorePublisher.class);
 
     private EventTrackingService newService(long intervalMs) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(2);
         scheduler.initialize();
-        return new EventTrackingService(scheduler, scoreFeedClient, scorePublisher, Duration.ofMillis(intervalMs));
+        return new EventTrackingService(scheduler, scoreClient, scorePublisher, Duration.ofMillis(intervalMs));
     }
 
     @Test
@@ -50,7 +50,7 @@ class EventTrackingServiceTest {
     @Test
     void pollBuildsLiveScoreUpdateFromFeedAndPublishes() {
         EventTrackingService service = newService(10_000);
-        when(scoreFeedClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("2:1")));
+        when(scoreClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("2:1")));
 
         service.pollOnce("1234");
 
@@ -66,7 +66,7 @@ class EventTrackingServiceTest {
     @Test
     void pollDoesNotPublishWhenFeedHasNoScore() {
         EventTrackingService service = newService(10_000);
-        when(scoreFeedClient.getCurrentScore("1234")).thenReturn(Optional.empty());
+        when(scoreClient.getCurrentScore("1234")).thenReturn(Optional.empty());
 
         service.pollOnce("1234");
 
@@ -76,7 +76,7 @@ class EventTrackingServiceTest {
     @Test
     void pollSwallowsFeedErrorsAndDoesNotPublish() {
         EventTrackingService service = newService(10_000);
-        when(scoreFeedClient.getCurrentScore("1234")).thenThrow(new RuntimeException("boom"));
+        when(scoreClient.getCurrentScore("1234")).thenThrow(new RuntimeException("boom"));
 
         service.pollOnce("1234"); // must not throw
 
@@ -86,7 +86,7 @@ class EventTrackingServiceTest {
     @Test
     void liveEventIsPolledRepeatedlyBySchedule() {
         EventTrackingService service = newService(50);
-        when(scoreFeedClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("0:0")));
+        when(scoreClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("0:0")));
 
         service.updateStatus("1234", true);
 
@@ -97,7 +97,7 @@ class EventTrackingServiceTest {
     @Test
     void markingNotLiveStopsFurtherPolling() throws InterruptedException {
         EventTrackingService service = newService(50);
-        when(scoreFeedClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("0:0")));
+        when(scoreClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("0:0")));
 
         service.updateStatus("1234", true);
         verify(scorePublisher, timeout(2_000).atLeastOnce()).publish(any(SportEvent.class));

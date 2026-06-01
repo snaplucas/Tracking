@@ -19,7 +19,6 @@ public class EventStatusController {
     public LiveEventsDto updateStatus(@PathVariable String eventId,
                                       @Valid @RequestBody EventStatusDto request) {
         boolean live = trackingService.updateStatus(eventId, request.live());
-
         return LiveEventsDto.builder()
                 .eventId(eventId)
                 .isLive(live)

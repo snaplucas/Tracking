@@ -14,27 +14,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-/**
- * Application service (use case orchestrator) for live-event tracking.
- *
- * <p>It owns the set of currently-live events and runs one recurring polling
- * task per live event. Each tick pulls the current score from the {@link
- * ScoreFeedClient} port, turns it into a {@link SportEvent} domain event, and hands
- * it to the {@link ScorePublisher} port. It depends only on domain abstractions
- * — never on HTTP, Kafka, or any framework transport.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventTrackingService  implements TrackingService{
 
     private final TaskScheduler pollingTaskScheduler;
-    private final ScoreFeedClient scoreFeedClient;
+    private final ScoreClient scoreClient;
     private final ScorePublisher scorePublisher;
 
     @Value("${tracking.polling.interval-ms}")
     private final Duration pollInterval;
-
     private final ConcurrentHashMap<String, ScheduledFuture<?>> liveTasks = new ConcurrentHashMap<>();
 
     @Override
@@ -66,7 +56,7 @@ public class EventTrackingService  implements TrackingService{
 
      void pollOnce(String eventId) {
         try {
-            scoreFeedClient.getCurrentScore(eventId).ifPresentOrElse(
+            scoreClient.getCurrentScore(eventId).ifPresentOrElse(
                     score -> {
                         SportEvent update = SportEvent.ofLive(eventId, score, Instant.now());
                         scorePublisher.publish(update);

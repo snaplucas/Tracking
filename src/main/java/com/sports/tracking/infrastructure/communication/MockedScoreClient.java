@@ -1,7 +1,7 @@
 package com.sports.tracking.infrastructure.communication;
 
 import com.sports.tracking.domain.Score;
-import com.sports.tracking.application.ScoreFeedClient;
+import com.sports.tracking.application.ScoreClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class RestScoreFeedClient implements ScoreFeedClient {
+public class MockedScoreClient implements ScoreClient {
 
     private final RestClient externalApiClient;
 

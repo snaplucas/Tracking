@@ -4,7 +4,7 @@ import com.sports.tracking.domain.Score;
 
 import java.util.Optional;
 
-public interface ScoreFeedClient {
+public interface ScoreClient {
 
     Optional<Score> getCurrentScore(String eventId);
 }
