@@ -1,6 +1,6 @@
 package com.sports.tracking.infrastructure.messaging;
 
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 import com.sports.tracking.application.ScorePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,17 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Infrastructure adapter implementing the {@link ScorePublisher} port over
- * Kafka. Maps the {@link ScoreUpdate} domain event to a {@link ScoreMessage}
- * and publishes it keyed by event id, so all updates for one event land on the
- * same partition and stay ordered.
- *
- * <p>The send is awaited so transient failures surface as exceptions, which the
- * {@link Retryable} policy retries with exponential backoff. When the attempts
- * are exhausted, {@link #recover} logs and swallows the failure so a single bad
- * event never kills the recurring polling schedule.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -48,7 +37,7 @@ public class KafkaScorePublisher implements ScorePublisher {
             backoff = @Backoff(
                     delayExpression = "${tracking.kafka.publish.backoff-ms:500}",
                     multiplierExpression = "${tracking.kafka.publish.backoff-multiplier:2.0}"))
-    public void publish(ScoreUpdate update) {
+    public void publish(SportEvent update) {
         ScoreMessage message = ScoreMessage.from(update);
         try {
             SendResult<String, ScoreMessage> result = kafkaTemplate
@@ -76,7 +65,7 @@ public class KafkaScorePublisher implements ScorePublisher {
      */
     @Recover
     @SuppressWarnings("unused")
-    public void recover(TransientPublishException ex, ScoreUpdate update) {
+    public void recover(TransientPublishException ex, SportEvent update) {
         log.error("Giving up publishing score for event {} to topic {} after retries",
                 update.eventId(), topic, ex);
     }

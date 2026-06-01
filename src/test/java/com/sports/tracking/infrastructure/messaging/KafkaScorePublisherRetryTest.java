@@ -2,7 +2,7 @@ package com.sports.tracking.infrastructure.messaging;
 
 import com.sports.tracking.domain.Score;
 import com.sports.tracking.application.ScorePublisher;
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class KafkaScorePublisherRetryTest {
     @Autowired
     private KafkaTemplate<String, ScoreMessage> kafkaTemplate;
 
-    private final ScoreUpdate update = ScoreUpdate.ofLive("1234", Score.of("0:0"), Instant.now());
+    private final SportEvent update = SportEvent.ofLive("1234", Score.of("0:0"), Instant.now());
 
     @BeforeEach
     void resetSharedMock() {

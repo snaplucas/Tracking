@@ -2,8 +2,6 @@ spring:
   application:
     name: tracking
   kafka:
-    # Broker address. The producer (String key + JSON ScoreMessage value) is
-    # built explicitly in AppConfig from this property.
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 server:
@@ -11,23 +9,15 @@ server:
 
 tracking:
   kafka:
-    # Topic the transformed score messages are published to.
     topic: sports.events.scores
     publish:
-      # Publish retry policy (application-level, on top of producer retries).
-      # Each send attempt waits up to send-timeout-ms for a broker ack;
-      # transient failures are retried up to max-attempts with exponential
-      # backoff.
       send-timeout-ms: 5000
       max-attempts: 3
       backoff-ms: 500
       backoff-multiplier: 2.0
   external:
-    # Base URL of the external scores API. Defaults to this same service, which
-    # exposes a mock endpoint under /mock/external for self-contained demos.
     base-url: ${EXTERNAL_API_BASE_URL:http://localhost:8080}
   polling:
-    # How often each live event is polled, in milliseconds.
     interval-ms: 10000
 
 management:

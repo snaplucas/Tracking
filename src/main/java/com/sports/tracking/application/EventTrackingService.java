@@ -1,6 +1,6 @@
 package com.sports.tracking.application;
 
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.concurrent.ScheduledFuture;
  *
  * <p>It owns the set of currently-live events and runs one recurring polling
  * task per live event. Each tick pulls the current score from the {@link
- * ScoreFeedClient} port, turns it into a {@link ScoreUpdate} domain event, and hands
+ * ScoreFeedClient} port, turns it into a {@link SportEvent} domain event, and hands
  * it to the {@link ScorePublisher} port. It depends only on domain abstractions
  * — never on HTTP, Kafka, or any framework transport.
  */
@@ -68,7 +68,7 @@ public class EventTrackingService  implements TrackingService{
         try {
             scoreFeedClient.getCurrentScore(eventId).ifPresentOrElse(
                     score -> {
-                        ScoreUpdate update = ScoreUpdate.ofLive(eventId, score, Instant.now());
+                        SportEvent update = SportEvent.ofLive(eventId, score, Instant.now());
                         scorePublisher.publish(update);
                         log.info("Polled event {} -> score {}", eventId, score);
                     },

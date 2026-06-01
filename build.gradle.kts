@@ -28,6 +28,7 @@ dependencies {
     // (version managed by the Boot platform).
     implementation("org.springframework.retry:spring-retry:2.0.12")
     implementation("org.aspectj:aspectjweaver")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

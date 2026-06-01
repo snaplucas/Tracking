@@ -1,7 +1,7 @@
 package com.sports.tracking.application;
 
 import com.sports.tracking.domain.Score;
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -54,9 +54,9 @@ class EventTrackingServiceTest {
 
         service.pollOnce("1234");
 
-        ArgumentCaptor<ScoreUpdate> captor = ArgumentCaptor.forClass(ScoreUpdate.class);
+        ArgumentCaptor<SportEvent> captor = ArgumentCaptor.forClass(SportEvent.class);
         verify(scorePublisher).publish(captor.capture());
-        ScoreUpdate update = captor.getValue();
+        SportEvent update = captor.getValue();
         assertThat(update.eventId()).isEqualTo("1234");
         assertThat(update.score().value()).isEqualTo("2:1");
         assertThat(update.status().name()).isEqualTo("LIVE");
@@ -91,7 +91,7 @@ class EventTrackingServiceTest {
         service.updateStatus("1234", true);
 
         // The scheduler should drive several polls -> several publishes.
-        verify(scorePublisher, timeout(2_000).atLeast(2)).publish(any(ScoreUpdate.class));
+        verify(scorePublisher, timeout(2_000).atLeast(2)).publish(any(SportEvent.class));
     }
 
     @Test
@@ -100,7 +100,7 @@ class EventTrackingServiceTest {
         when(scoreFeedClient.getCurrentScore("1234")).thenReturn(Optional.of(Score.of("0:0")));
 
         service.updateStatus("1234", true);
-        verify(scorePublisher, timeout(2_000).atLeastOnce()).publish(any(ScoreUpdate.class));
+        verify(scorePublisher, timeout(2_000).atLeastOnce()).publish(any(SportEvent.class));
 
         service.updateStatus("1234", false);
         clearInvocations(scorePublisher);

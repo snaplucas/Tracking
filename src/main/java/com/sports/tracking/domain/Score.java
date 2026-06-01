@@ -12,9 +12,4 @@ public record Score(String value) {
     public static Score of(String value) {
         return new Score(value);
     }
-
-    @Override
-    public String toString() {
-        return value;
-    }
 }

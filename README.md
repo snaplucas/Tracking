@@ -29,21 +29,21 @@ Marking an event *not live* stops the polling for that event.
                  Kafka topic: sports.events.scores
 ```
 
-### Architecture (Domain-Driven Design / hexagonal)
+### Architecture (Domain-Driven Design / hexagonal architecture / clean architecture )
 
 The code is organized into three layers. Dependencies point **inward**: the
 domain knows nothing about Spring, HTTP, or Kafka; the application depends only
 on domain ports; infrastructure provides the adapters.
 
-| Layer | Package | Contents |
-|-------|---------|----------|
-| **Domain** | `domain.model` | `Score`, `ScoreUpdate`, `EventStatus` — value objects & the core domain event |
-| | `domain.port` | `ScoreFeed`, `ScorePublisher` — outbound ports the core owns |
-| **Application** | `application` | `EventTrackingService` — the use case: schedule/cancel per-event polling, build `ScoreUpdate`s, hand them to the ports |
-| **Infrastructure** | `infrastructure.web` | `EventStatusController` (inbound adapter), `MockExternalApiController`, error handling |
-| | `infrastructure.external` | `RestScoreFeed` implements `ScoreFeed` over HTTP; `ExternalEventResponse` (anti-corruption wire DTO) |
-| | `infrastructure.messaging` | `KafkaScorePublisher` implements `ScorePublisher`; `ScoreMessage` (Kafka serialization DTO) |
-| | `infrastructure.config` | `AppConfig` — `RestClient`, `TaskScheduler`, Kafka topic & producer beans |
+| Layer | Package | Contents                                                                                                              |
+|-------|---------|-----------------------------------------------------------------------------------------------------------------------|
+| **Domain** | `domain.model` | `Score`, `SportEvent`, `EventStatus` — value objects & the core domain event                                          |
+| | `domain.port` | `ScoreFeed`, `ScorePublisher` — outbound ports the core owns                                                          |
+| **Application** | `application` | `EventTrackingService` — the use case: schedule/cancel per-event polling, build `SportEvent`s, hand them to the ports |
+| **Infrastructure** | `infrastructure.web` | `EventStatusController` (inbound adapter), `MockExternalApiController`, error handling                                |
+| | `infrastructure.external` | `RestScoreFeed` implements `ScoreFeed` over HTTP; `ExternalEventResponse` (anti-corruption wire DTO)                  |
+| | `infrastructure.messaging` | `KafkaScorePublisher` implements `ScorePublisher`; `ScoreMessage` (Kafka serialization DTO)                           |
+| | `infrastructure.config` | `AppConfig` — `RestClient`, `TaskScheduler`, Kafka topic & producer beans                                             |
 
 > The external API is **mocked inside this same service** (`/mock/external/...`)
 > so the app runs end-to-end with no third-party dependency. Point
@@ -109,6 +109,8 @@ curl http://localhost:8080/api/events/1234       # -> {"eventId":"1234","live":t
 
 ---
 
+Alternatively the endpoints can be accessed using swagger with the url http://localhost:8080/swagger-ui/index.html 
+
 ## Verify messages are published
 
 **Option A — Kafka UI:** open http://localhost:8081 → cluster `local` →
@@ -168,9 +170,9 @@ from the slow, infrastructure-backed component tests.
 ```
 
 **Unit tests** — application module (`:`), fast, no infrastructure:
-- `domain.ScoreTest`, `domain.ScoreUpdateTest` — value-object construction, validation, equality.
+- `domain.ScoreTest`, `domain.SportEventTest` — value-object construction, validation, equality.
 - `application.EventTrackingServiceTest` — live/not-live scheduling, idempotency,
-  the feed→`ScoreUpdate` mapping, periodic polling, and error isolation. Drives the
+  the feed→`SportEvent` mapping, periodic polling, and error isolation. Drives the
   application service against mocked domain ports.
 - `TrackingApplicationTests` — context load smoke test using an embedded Kafka broker.
 
@@ -195,13 +197,13 @@ tracking/                                     # root = the application module (:
 │   │
 │   ├── domain/                               # ── DOMAIN LAYER (no framework deps)
 │   │   ├── Score.java                        #   value object
-│   │   ├── ScoreUpdate.java                  #   core domain event
+│   │   ├── SportEvent.java                  #   core domain event
 │   │   ├── EventStatus.java                  #   value object
 │   │   ├── ScoreFeed.java                    #   outbound port (source of scores)
 │   │   └── ScorePublisher.java               #   outbound port (sink for updates)
 │   │
 │   ├── application/                          # ── APPLICATION LAYER (use cases)
-│   │   └── EventTrackingService.java         #   schedules polling, builds ScoreUpdates
+│   │   └── EventTrackingService.java         #   schedules polling, builds SportEvents
 │   │
 │   └── infrastructure/                       # ── INFRASTRUCTURE LAYER (adapters)
 │       ├── web/                              #   inbound: REST controllers + errors

@@ -1,7 +1,7 @@
 package com.sports.tracking.infrastructure.messaging;
 
 import com.sports.tracking.domain.Score;
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +34,7 @@ class KafkaScorePublisherTest {
     private final KafkaTemplate<String, ScoreMessage> kafkaTemplate = mock(KafkaTemplate.class);
     private final KafkaScorePublisher publisher = new KafkaScorePublisher(kafkaTemplate, TOPIC, 1000);
 
-    private final ScoreUpdate update = ScoreUpdate.ofLive("1234", Score.of("2:1"), Instant.now());
+    private final SportEvent update = SportEvent.ofLive("1234", Score.of("2:1"), Instant.now());
 
     @Test
     void publishesMessageBuiltFromUpdateKeyedByEventId() {

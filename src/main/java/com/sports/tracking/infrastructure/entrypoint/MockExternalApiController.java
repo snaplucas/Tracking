@@ -9,18 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Stand-in for the real external scores API so the service is self-contained
- * and runnable without any third party. It returns the exact contract given in
- * the brief:
- *
- * <pre>
- * { "eventId": "1234", "currentScore": "0:0" }
- * </pre>
- *
- * <p>To keep demos lively, each event's score slowly evolves: every few polls a
- * goal is added to one side.
- */
+
 @RestController
 @RequestMapping("/mock/external")
 public class MockExternalApiController {

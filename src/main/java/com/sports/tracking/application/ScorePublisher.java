@@ -1,8 +1,8 @@
 package com.sports.tracking.application;
 
-import com.sports.tracking.domain.ScoreUpdate;
+import com.sports.tracking.domain.SportEvent;
 
 public interface ScorePublisher {
 
-    void publish(ScoreUpdate update);
+    void publish(SportEvent update);
 }

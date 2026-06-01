@@ -105,17 +105,17 @@ class LiveEventTrackingComponentTest {
         try {
             ResponseEntity<String> live = putStatus(eventId, "{\"live\": true}");
             assertThat(live.getStatusCode().value()).isEqualTo(200);
-            assertThat(json.readTree(live.getBody()).get("live").asBoolean()).isTrue();
+            assertThat(json.readTree(live.getBody()).get("isLive").asBoolean()).isTrue();
 
             String list = rest.get().uri("/api/events").retrieve().body(String.class);
             assertThat(json.readTree(list).get("liveEvents").toString()).contains(eventId);
 
             String status = rest.get().uri("/api/events/{id}", eventId).retrieve().body(String.class);
-            assertThat(json.readTree(status).get("live").asBoolean()).isTrue();
+            assertThat(json.readTree(status).get("isLive").asBoolean()).isTrue();
         } finally {
             ResponseEntity<String> notLive = putStatus(eventId, "{\"live\": false}");
             assertThat(notLive.getStatusCode().value()).isEqualTo(200);
-            assertThat(json.readTree(notLive.getBody()).get("live").asBoolean()).isFalse();
+            assertThat(json.readTree(notLive.getBody()).get("isLive").asBoolean()).isFalse();
         }
     }
 

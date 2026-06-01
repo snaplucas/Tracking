@@ -7,12 +7,12 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestClient;
@@ -20,16 +20,10 @@ import org.springframework.web.client.RestClient;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Infrastructure beans: the HTTP client used to call the external scores API,
- * the thread pool that runs the per-event polling tasks, and the Kafka topic
- * and producer.
- */
 @Configuration
 @EnableRetry
 public class AppConfig {
 
-    /** HTTP client pointed at the external scores API. */
     @Bean
     RestClient externalApiClient(@Value("${tracking.external.base-url}") String baseUrl) {
         return RestClient.builder()
@@ -37,10 +31,6 @@ public class AppConfig {
                 .build();
     }
 
-    /**
-     * Dedicated scheduler for the per-event polling tasks so that slow or
-     * stuck polls do not starve the rest of the application.
-     */
     @Bean
     TaskScheduler pollingTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -51,7 +41,6 @@ public class AppConfig {
         return scheduler;
     }
 
-    /** Auto-create the destination topic on startup (single broker => RF 1). */
     @Bean
     NewTopic scoresTopic(@Value("${tracking.kafka.topic}") String topic) {
         return TopicBuilder.name(topic)
@@ -60,11 +49,6 @@ public class AppConfig {
                 .build();
     }
 
-    /**
-     * Producer factory for String keys and JSON-serialized {@link ScoreMessage}
-     * values. Defined explicitly so the {@link KafkaTemplate} is strongly typed
-     * and unambiguous to inject.
-     */
     @Bean
     ProducerFactory<String, ScoreMessage> producerFactory(
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
@@ -74,11 +58,6 @@ public class AppConfig {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         config.put(JacksonJsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         config.put(ProducerConfig.ACKS_CONFIG, "all");
-        // Producer-level retries for transient broker/network failures. This is
-        // the first line of defence; the application-level @Retryable in
-        // KafkaScorePublisher recovers from failures that outlive these. The
-        // default delivery.timeout.ms (120s) bounds the total time across these
-        // retries.
         config.put(ProducerConfig.RETRIES_CONFIG, 3);
         return new DefaultKafkaProducerFactory<>(config);
     }

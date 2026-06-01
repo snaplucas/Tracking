@@ -12,7 +12,7 @@ class ScoreTest {
         Score score = Score.of("2:1");
 
         assertThat(score.value()).isEqualTo("2:1");
-        assertThat(score).hasToString("2:1");
+        assertThat(score).hasToString("Score[value=2:1]");
     }
 
     @Test

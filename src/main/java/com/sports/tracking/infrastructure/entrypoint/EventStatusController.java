@@ -1,26 +1,13 @@
 package com.sports.tracking.infrastructure.entrypoint;
 
-import com.sports.tracking.application.EventTrackingService;
 import com.sports.tracking.application.TrackingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Inbound web adapter: receives live ↔ not-live status updates for events and
- * drives the {@link EventTrackingService} application service.
- *
- * <pre>
- * PUT /api/events/{eventId}/status   body: {"live": true}    -> start tracking
- * PUT /api/events/{eventId}/status   body: {"live": false}   -> stop tracking
- * GET /api/events                                            -> list live events
- * GET /api/events/{eventId}                                  -> status of one event
- * </pre>
- */
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
@@ -29,10 +16,14 @@ public class EventStatusController {
     private final TrackingService trackingService;
 
     @PutMapping("/{eventId}/status")
-    public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable String eventId,
-                                                            @Valid @RequestBody EventStatusDto request) {
+    public LiveEventsDto updateStatus(@PathVariable String eventId,
+                                      @Valid @RequestBody EventStatusDto request) {
         boolean live = trackingService.updateStatus(eventId, request.live());
-        return ResponseEntity.ok(Map.of("eventId", eventId, "live", live));
+
+        return LiveEventsDto.builder()
+                .eventId(eventId)
+                .isLive(live)
+                .build();
     }
 
     @GetMapping
@@ -42,7 +33,10 @@ public class EventStatusController {
     }
 
     @GetMapping("/{eventId}")
-    public Map<String, Object> status(@PathVariable String eventId) {
-        return Map.of("eventId", eventId, "live", trackingService.isLive(eventId));
+    public LiveEventsDto status(@PathVariable String eventId) {
+        return LiveEventsDto.builder()
+                .eventId(eventId)
+                .isLive(trackingService.isLive(eventId))
+                .build();
     }
 }
