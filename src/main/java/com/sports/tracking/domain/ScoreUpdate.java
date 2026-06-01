@@ -20,8 +20,7 @@ public record ScoreUpdate(String eventId, Score score, EventStatus status, Insta
         }
     }
 
-    /** Factory for an update of a currently-live event. */
-    public static ScoreUpdate live(String eventId, Score score, Instant observedAt) {
+    public static ScoreUpdate ofLive(String eventId, Score score, Instant observedAt) {
         return new ScoreUpdate(eventId, score, EventStatus.LIVE, observedAt);
     }
 }

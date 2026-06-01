@@ -1,6 +1,7 @@
-package com.sports.tracking.infrastructure.web;
+package com.sports.tracking.infrastructure.entrypoint;
 
 import com.sports.tracking.application.EventTrackingService;
+import com.sports.tracking.application.TrackingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class EventStatusController {
 
-    private final EventTrackingService trackingService;
+    private final TrackingService trackingService;
 
     @PutMapping("/{eventId}/status")
     public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable String eventId,
-                                                            @Valid @RequestBody EventStatusRequest request) {
+                                                            @Valid @RequestBody EventStatusDto request) {
         boolean live = trackingService.updateStatus(eventId, request.live());
         return ResponseEntity.ok(Map.of("eventId", eventId, "live", live));
     }

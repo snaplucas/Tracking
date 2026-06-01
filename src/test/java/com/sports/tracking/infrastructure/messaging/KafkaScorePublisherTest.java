@@ -34,7 +34,7 @@ class KafkaScorePublisherTest {
     private final KafkaTemplate<String, ScoreMessage> kafkaTemplate = mock(KafkaTemplate.class);
     private final KafkaScorePublisher publisher = new KafkaScorePublisher(kafkaTemplate, TOPIC, 1000);
 
-    private final ScoreUpdate update = ScoreUpdate.live("1234", Score.of("2:1"), Instant.now());
+    private final ScoreUpdate update = ScoreUpdate.ofLive("1234", Score.of("2:1"), Instant.now());
 
     @Test
     void publishesMessageBuiltFromUpdateKeyedByEventId() {

@@ -54,8 +54,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         })
 @EmbeddedKafka(
         partitions = 1,
-        topics = "sports.events.scores",
-        bootstrapServersProperty = "spring.kafka.bootstrap-servers")
+        topics = "sports.events.scores"
+)
 class LiveEventTrackingComponentTest {
 
     private static final String BASE_URL = "http://localhost:18085";
@@ -74,7 +74,7 @@ class LiveEventTrackingComponentTest {
     // ------------------------------------------------------------------ //
 
     @Test
-    void liveEventIsPolledAndScorePublishedToKafka() throws Exception {
+    void liveEventIsPolledAndScorePublishedToKafka() {
         String eventId = "evt-e2e";
 
         try (Consumer<String, String> consumer = newConsumer()) {
@@ -86,10 +86,10 @@ class LiveEventTrackingComponentTest {
 
             assertThat(record).as("a score message keyed by %s", eventId).isNotNull();
             JsonNode message = json.readTree(record.value());
-            assertThat(message.get("eventId").asText()).isEqualTo(eventId);
-            assertThat(message.get("status").asText()).isEqualTo("LIVE");
-            assertThat(message.get("score").asText()).matches("\\d+:\\d+");
-            assertThat(message.get("polledAt").asText()).isNotBlank();
+            assertThat(message.get("eventId").asString()).isEqualTo(eventId);
+            assertThat(message.get("status").asString()).isEqualTo("LIVE");
+            assertThat(message.get("score").asString()).matches("\\d+:\\d+");
+            assertThat(message.get("polledAt").asString()).isNotBlank();
         } finally {
             putStatus(eventId, "{\"live\": false}");
         }
@@ -100,7 +100,7 @@ class LiveEventTrackingComponentTest {
     // ------------------------------------------------------------------ //
 
     @Test
-    void marksEventLiveThenNotLiveAndReflectsItInListings() throws Exception {
+    void marksEventLiveThenNotLiveAndReflectsItInListings() {
         String eventId = "evt-rest";
         try {
             ResponseEntity<String> live = putStatus(eventId, "{\"live\": true}");
@@ -120,11 +120,11 @@ class LiveEventTrackingComponentTest {
     }
 
     @Test
-    void invalidStatusBodyReturns400() throws Exception {
+    void invalidStatusBodyReturns400() {
         ResponseEntity<String> response = putStatus("evt-bad", "{}"); // missing "live"
 
         assertThat(response.getStatusCode().value()).isEqualTo(400);
-        assertThat(json.readTree(response.getBody()).get("error").asText()).isEqualTo("validation_failed");
+        assertThat(json.readTree(response.getBody()).get("error").asString()).isEqualTo("validation_failed");
     }
 
     @Test
@@ -132,8 +132,8 @@ class LiveEventTrackingComponentTest {
         String body = rest.get().uri("/mock/external/events/{id}", "evt-mock").retrieve().body(String.class);
 
         JsonNode node = json.readTree(body);
-        assertThat(node.get("eventId").asText()).isEqualTo("evt-mock");
-        assertThat(node.get("currentScore").asText()).matches("\\d+:\\d+");
+        assertThat(node.get("eventId").asString()).isEqualTo("evt-mock");
+        assertThat(node.get("currentScore").asString()).matches("\\d+:\\d+");
     }
 
     // ------------------------------------------------------------------ //

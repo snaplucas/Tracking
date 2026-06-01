@@ -1,4 +1,4 @@
-package com.sports.tracking.infrastructure.web;
+package com.sports.tracking.infrastructure.entrypoint;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -6,5 +6,5 @@ import jakarta.validation.constraints.NotNull;
  * Body of a status update for an event: {@code {"live": true}} or
  * {@code {"live": false}}.
  */
-public record EventStatusRequest(@NotNull Boolean live) {
+public record EventStatusDto(@NotNull Boolean live) {
 }

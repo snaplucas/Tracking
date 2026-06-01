@@ -1,7 +1,7 @@
 package com.sports.tracking.infrastructure.messaging;
 
 import com.sports.tracking.domain.ScoreUpdate;
-import com.sports.tracking.domain.ScorePublisher;
+import com.sports.tracking.application.ScorePublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,6 +75,7 @@ public class KafkaScorePublisher implements ScorePublisher {
      * and return normally so the caller's polling schedule keeps running.
      */
     @Recover
+    @SuppressWarnings("unused")
     public void recover(TransientPublishException ex, ScoreUpdate update) {
         log.error("Giving up publishing score for event {} to topic {} after retries",
                 update.eventId(), topic, ex);

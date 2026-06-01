@@ -12,8 +12,8 @@ class ScoreUpdateTest {
     private static final Instant AT = Instant.parse("2026-05-30T12:00:00Z");
 
     @Test
-    void liveFactoryBuildsLiveUpdate() {
-        ScoreUpdate update = ScoreUpdate.live("1234", Score.of("1:0"), AT);
+    void liveFactoryBuildsOfLiveUpdate() {
+        ScoreUpdate update = ScoreUpdate.ofLive("1234", Score.of("1:0"), AT);
 
         assertThat(update.eventId()).isEqualTo("1234");
         assertThat(update.score()).isEqualTo(Score.of("1:0"));
@@ -37,7 +37,7 @@ class ScoreUpdateTest {
 
     @Test
     void rejectsBlankEventId() {
-        assertThatThrownBy(() -> ScoreUpdate.live("  ", Score.of("0:0"), AT))
+        assertThatThrownBy(() -> ScoreUpdate.ofLive("  ", Score.of("0:0"), AT))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("eventId");
     }
