@@ -6,6 +6,20 @@ transforms the response into a message, and publishes it to a **Kafka** topic.
 
 Marking an event *not live* stops the polling for that event.
 
+## Design decisions
+* The project is using the Eric Evans ideas from domain-driven design
+* The core is in the domain layer and the classes are not anemic (they can validate itself)
+* Score is a value object for the SportEvent entity
+* Event tracking service is orchestrating the use cases of tracking sports events
+* The dependencies are inverted by using interfaces in the application layer, it makes it decoupled of any specific library or framework and also makes easy to adapt to different use cases
+* EventTrackingService is implementing an interface , so in the most outside layer it is easy to change between different ways of tracking the events
+* Everything is glued on AppConfig, which uses factory beans to instantiate the concrete classes
+* For the layers I decided to go with a simpler and more straight forward approach with just 3 layers and the dependency rule instead of using a more traditional port and adapters approach
+-- this sometimes can be unnecessary complicated and usually comes with an indirection overload
+* When designing the classes and methods I tried to follow John Ousterhout's approach on modular design more than Uncle Bob's clean code
+* The Docker part was done exclusively with AI
+* Claude code was used to help to create the first working version of the project, and later I updated with the design approach mentioned previously 
+
 ---
 
 ## How it works
